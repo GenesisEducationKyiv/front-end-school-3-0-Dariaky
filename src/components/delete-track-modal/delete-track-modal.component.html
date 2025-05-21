@@ -1,0 +1,20 @@
+<h2 mat-dialog-title>Delete track</h2>
+<mat-dialog-content data-testid="confirm-dialog">
+
+  @if (submitted()) {
+    <mat-spinner></mat-spinner>
+  }
+  @else {
+    @if (trackData.track) {
+      <p>Are you sure you want to delete the track "{{trackData?.track?.title}}"?</p>
+    }
+    @else {
+      <p>Are you sure you want to delete {{trackData?.tracks?.length}} track{{trackData?.tracks?.length === 1 ? '' : 's'}}?</p>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions [align]="'end'">
+  <button data-testid="cancel-delete" mat-button (click)="close()" [disabled]="submitted()">Close</button>
+  <button data-testid="confirm-delete" mat-button color="warn" cdkFocusInitial (click)="submit()" [disabled]="submitted()">Delete</button>
+</mat-dialog-actions>

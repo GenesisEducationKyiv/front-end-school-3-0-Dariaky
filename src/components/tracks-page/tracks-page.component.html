@@ -1,0 +1,103 @@
+<h1 data-testid="tracks-header">Music Tracks</h1>
+
+<section [attr.data-loading]="loading() ? 'true' : false">
+  <div class="main-actions">
+    @if (selectedTracks().length) {
+      <button mat-button color="warn" (click)="deleteMultiple()">Delete {{selectedTracks().length}} track{{selectedTracks().length === 1 ? '' : 's'}}</button>
+    }
+    <button mat-button color="primary" (click)="reset()">Reset filters</button>
+    <button data-testid="create-track-button" mat-flat-button color="primary" (click)="createTrack()">Create track</button>
+  </div>
+
+  <div class="filters">
+    <div class="select-filter">
+      <mat-form-field>
+        <mat-label>Sort by</mat-label>
+        <mat-select data-testid="sort-select" #sortSelect (selectionChange)="sortChanged($event.value)">
+          <mat-option value="title">Title</mat-option>
+          <mat-option value="artist">Artist</mat-option>
+          <mat-option value="album">Album</mat-option>
+          <mat-option value="createdAt">Creation date</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Order</mat-label>
+        <mat-select #orderSelect (selectionChange)="orderChanged($event.value)">
+          <mat-option value="asc">Ascending</mat-option>
+          <mat-option value="desc">Descending</mat-option>
+        </mat-select>
+      </mat-form-field>
+      @if (artistsAvailable().length) {
+        <mat-form-field>
+          <mat-label>Artists</mat-label>
+          <mat-select data-testid="filter-artist" #artistsSelect (selectionChange)="artistChanged($event.value)">
+            @for (artist of artistsAvailable(); track artist) {
+              <mat-option [value]="artist">{{ artist }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      @if (genresAvailable().length) {
+        <mat-form-field>
+          <mat-label>Genres</mat-label>
+          <mat-select data-testid="filter-genre" #genresSelect (selectionChange)="genreChanged($event.value)">
+            @for (genre of genresAvailable(); track genre) {
+              <mat-option [value]="genre">{{ genre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+    </div>
+    <div>
+      <mat-form-field class="search-filter">
+        <mat-label>Search</mat-label>
+        <input data-testid="search-input" #trackSearch placeholder="Search for title, artist, album..." matInput (input)="searchChanged($event)" />
+      </mat-form-field>
+    </div>
+  </div>
+
+  <paginator
+    class="paginator"
+    (pageChange)="onPageChange($event)"
+    [pageSize]="limit()"
+    [length]="pageTotal()">
+  </paginator>
+
+  @if (loading()) {
+    <div class="track-loading-container">
+      <mat-spinner class="track-loading" data-testid="loading-tracks"></mat-spinner>
+    </div>
+  }
+  @else {
+    @if (tracks().length) {
+      <ul class="track-list">
+          @for (track of tracks(); track track) {
+            <li [attr.data-testid]="'track-item-' + track.id" class="track-item">
+              <div class="track-item__header">
+                <div>
+                  <img alt="Album cover" class="track-item__image" [src]="track?.coverImage ? track.coverImage : DEFAULT_COVER_IMAGE"/>
+
+                  <h2 [attr.data-testid]="'track-item-' + track.id + '-title'">{{track.title}}</h2>
+                  <p [attr.data-testid]="'track-item-' + track.id + '-artist'">{{track.artist}}</p>
+                </div>
+                <div class="track-item__actions">
+                  <span [attr.data-testid]="'edit-track-' + track.id" class="track-item__edit material-icons" (click)="editTrack(track)">edit</span>
+                  <span [attr.data-testid]="'delete-track-' + track.id" class="track-item__remove material-icons" (click)="deleteTrack(track)">delete</span>
+                  <mat-checkbox (click)="toggleTracksSelection(track.id)"></mat-checkbox>
+                </div>
+              </div>
+
+              <track-file-uploader
+                [trackId]="track.id"
+                [trackAudioFile]="track?.audioFile ?? ''"
+                (fileUploaded)="retrieveTracks()"
+              ></track-file-uploader>
+            </li>
+          }
+        </ul>
+    }
+    @else {
+      <p>No tracks founds! Please update your search or create new tracks</p>
+    }
+  }
+</section>
