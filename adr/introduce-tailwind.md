@@ -16,6 +16,19 @@ the design system, such as colors, spacing, and breakpoints. Last but not least,
 @tailwind utilities;
 ```
 
+### Migration Plan
+Taking into consideration the size of our applications which is relatively small (only 2 scss files) by the moment of writing this cdr,
+we will make a migration using big bang approach that can be completed under "Tailwind Introduction" epic with the following tasks:
+
+1. Install and set up Tailwind config (3 points, up to 2 days);
+2. Adjust Tailwind to accept our custom project theme (colors, breakpoints, spacing etc). Work with designer. (3 points, up to 2 days);
+3. Introduce Angular Material override file to bring it to our custom project theme. Work with designer. (3 points, up to 2 days);
+4. Refactor existing styles to use Tailwind utility classes (2 points, up to 1 day);
+
+Keep in mind that Tailwind CSS should be used on modules/components level. It does not relate to the global styles which define
+high-level styling (normalizing, typography, overrides of Angular Material, etc.).
+
+
 ## Rationale
 Tailwind helps to:
 - Increase development speed
