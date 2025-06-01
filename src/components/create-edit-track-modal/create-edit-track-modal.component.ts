@@ -12,7 +12,7 @@ import {MatInputModule} from "@angular/material/input";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {TracksService} from "../../services";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {imageUrlValidator, atLeastOneGenreValidator} from "../../shared/utils/validators";
+import {atLeastOneGenreValidator} from "../../shared/utils/validators";
 import {TrackCreateRequest, TrackSearchItem} from "../../types/track-search-item.type";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {DEFAULT_COVER_IMAGE} from "../../shared/utils/default-cover";
@@ -59,7 +59,7 @@ export class CreateEditTrackModalComponent implements OnInit {
       artist: ['', Validators.required],
       album: [''],
       genres: [[], atLeastOneGenreValidator()],
-      coverImage: ['', imageUrlValidator()]
+      coverImage: ['']
     });
 
     if (!this.creationMode()) {

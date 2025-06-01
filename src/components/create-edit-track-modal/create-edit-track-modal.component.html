@@ -49,11 +49,6 @@
       <mat-form-field>
         <mat-label>Cover Image</mat-label>
         <input data-testid="input-cover-image" matInput formControlName="coverImage" />
-        @if (trackForm.get('coverImage')?.hasError('invalidImageUrl')) {
-          <mat-error>
-            Please enter a valid image URL (.png, .jpg, .jpeg, .gif or .webp).
-          </mat-error>
-        }
       </mat-form-field>
 
     </form>
