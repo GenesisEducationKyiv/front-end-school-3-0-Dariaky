@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>{{creationMode() ? 'Create' : 'Edit'}} a track</h2>
+<mat-dialog-content>
+
+  @if (submitted()) {
+    <mat-spinner></mat-spinner>
+  }
+  @else {
+    <form data-testid="track-form" [formGroup]="trackForm">
+      <mat-form-field>
+        <mat-label>Track title</mat-label>
+        <input data-testid="input-title" matInput formControlName="title" />
+        @if (trackForm.get('title')?.hasError('required')) {
+          <mat-error data-testid="error-title">Track title is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Artist</mat-label>
+        <input data-testid="input-artist" matInput formControlName="artist" />
+        @if ( trackForm.get('artist')?.hasError('required')) {
+          <mat-error data-testid="error-artist">Artist name is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Album</mat-label>
+        <input data-testid="input-album" matInput formControlName="album" />
+      </mat-form-field>
+
+      @if (this.genres().length) {
+        <ul data-testid="genre-selector" class="genres-list">
+          @for (genre of genres(); track genre; let i = $index) {
+            <li class="genres-item" [class.selected]="isSelected(i)" (click)="toggleGenre(i)">
+              {{genre}}
+              @if (isSelected(i)) {
+                <span class="material-icons">close</span>
+              }
+              @else {
+                <span class="material-icons">add</span>
+              }
+            </li>
+          }
+        </ul>
+        @if (genreClicked() && trackForm.get('genres')?.hasError('atLeastOneGenre')) {
+          <mat-error data-testid="error-genre">Please select at least one genre</mat-error>
+        }
+      }
+
+      <mat-form-field>
+        <mat-label>Cover Image</mat-label>
+        <input data-testid="input-cover-image" matInput formControlName="coverImage" />
+      </mat-form-field>
+
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions [align]="'end'">
+  <button mat-button (click)="close()" [attr.aria-disabled]="submitted()" [disabled]="submitted()">Close</button>
+  <button data-testid="submit-button" [attr.aria-disabled]="trackForm.invalid || submitted()" mat-button cdkFocusInitial (click)="submit()" [disabled]="trackForm.invalid || submitted()">{{creationMode() ? 'Create' : 'Edit'}}</button>
+</mat-dialog-actions>
+

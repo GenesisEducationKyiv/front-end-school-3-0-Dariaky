@@ -1,0 +1,94 @@
+:host {
+  display: block;
+  padding: 24px;
+
+  .main-actions {
+    display: flex;
+    gap: 24px;
+    justify-content: flex-end;
+    margin-bottom: 24px;
+  }
+
+  .select-filter {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 8px;
+  }
+
+  .search-filter {
+    min-width: 350px;
+  }
+
+  .paginator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .track-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .track-item {
+    width: 300px;
+    height: 250px;
+    border: 1px solid gray;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      flex-grow: 1;
+    }
+
+    &__actions {
+      position: relative;
+      align-self: self-start;
+      display: flex;
+      gap: 12px;
+
+      mat-checkbox {
+        position: absolute;
+        top: 32px;
+        right: -8px;
+      }
+    }
+
+    &__remove {
+      cursor: pointer;
+      color: #ff5252;
+      &:hover {
+        color: #f32d2d;
+      }
+    }
+
+    &__edit {
+      cursor: pointer;
+      color: #323232;
+      &:hover {
+        color: #686868;
+      }
+    }
+
+
+    &__image {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .track-loading-container {
+    display: flex;
+    justify-content: center;
+  }
+  .track-loading {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}

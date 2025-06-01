@@ -1,0 +1,14 @@
+header {
+  padding: 24px;
+  border-bottom: 1px solid #ccc;
+
+  .logo_title {
+    text-decoration: none;
+    display: flex;
+    gap: 8px;
+  }
+  .logo {
+    width: 30px;
+    height: auto;
+  }
+}
