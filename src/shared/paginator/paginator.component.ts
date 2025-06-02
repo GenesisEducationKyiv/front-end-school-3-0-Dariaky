@@ -1,5 +1,7 @@
-import {Component, computed, input, output, signal} from '@angular/core';
-import {MatButtonModule} from "@angular/material/button";
+import { Component, computed, input, output, signal } from '@angular/core';
+
+import { MatButtonModule } from '@angular/material/button';
+
 
 @Component({
   selector: 'paginator',

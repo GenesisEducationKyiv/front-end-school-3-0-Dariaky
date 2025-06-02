@@ -1,8 +1,8 @@
-import {Component, DestroyRef, inject, signal} from '@angular/core';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import {MatButtonModule} from "@angular/material/button";
-import {MatProgressSpinner} from "@angular/material/progress-spinner";
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -10,11 +10,11 @@ import {
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle
-} from "@angular/material/dialog";
+} from '@angular/material/dialog';
 
-import {TracksService} from "../../services";
-import {DeleteTrackModalData, TrackModalResult} from "../../types/track-modal.type";
-import {isTrackData, isTracksData} from "../../types/track-modal.predicate";
+import { TracksService } from "../../services";
+import { DeleteTrackModalData, TrackModalResult } from '../../types/track-modal.type';
+import { isTrackData, isTracksData } from '../../types/track-modal.predicate';
 
 
 @Component({

@@ -1,23 +1,22 @@
-import {Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, viewChild} from '@angular/core';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, delay, distinctUntilChanged, Subject} from "rxjs";
+import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, delay, distinctUntilChanged, Subject } from 'rxjs';
 
-import {MatButtonModule} from "@angular/material/button";
-import {MatDialog} from "@angular/material/dialog";
-import {MatFormFieldModule} from "@angular/material/form-field";
-import {MatOption, MatSelect, MatSelectModule} from "@angular/material/select";
-import {MatInputModule} from "@angular/material/input";
-import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {MatCheckbox} from "@angular/material/checkbox";
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatOption, MatSelect, MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatCheckbox } from '@angular/material/checkbox';
 
-import {isCollection} from "../../types/track-search-item.predicate";
-import {Collection, TrackOrder, TrackSearchItem, TrackSort} from "../../types/track-search-item.type";
-import {CreateEditTrackModalComponent} from "../create-edit-track-modal/create-edit-track-modal.component";
-import {DeleteTrackModalComponent} from "../delete-track-modal/delete-track-modal.component";
-import {TrackFileUploaderComponent} from "../track-file-uploader/track-file-uploader.component";
-import {DEFAULT_COVER_IMAGE} from "../../shared/utils/default-cover";
-import {PaginatorComponent} from "../../shared/paginator/paginator.component";
-import {TracksService} from "../../services";
+import { TrackCollectionResponse, TrackOrder, TrackSearchItem, TrackSort } from '../../types/track-api.type';
+import { CreateEditTrackModalComponent } from '../create-edit-track-modal/create-edit-track-modal.component';
+import { DeleteTrackModalComponent } from '../delete-track-modal/delete-track-modal.component';
+import { TrackFileUploaderComponent } from '../track-file-uploader/track-file-uploader.component';
+import { DEFAULT_COVER_IMAGE } from '../../shared/utils/default-cover';
+import { PaginatorComponent } from '../../shared/paginator/paginator.component';
+import { TracksService} from '../../services';
 
 
 @Component({
@@ -72,20 +71,18 @@ export class TracksPageComponent implements OnInit {
   ngOnInit(): void {
     this.loading.set(true);
     this.tracksService.getTracks().pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((res: Collection) => {
-        if (isCollection(res)) {
+      .subscribe((res: (TrackCollectionResponse | null)) => {
+        if (res) {
           this.tracks.set(res.data);
           this.originalTracks.set(res.data);
           this.pageTotal.set(res.meta.total);
-        } else {
-          console.error('Invalid response format:', res);
         }
         this.loading.set(false);
       })
 
     this.tracksService.getGenres().pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((genres: string[]) => {
-        if (Array.isArray(genres)) {
+      .subscribe((genres: string[] | null) => {
+        if (genres && Array.isArray(genres)) {
           this.genresAvailable.set(genres);
         }
       });
@@ -111,12 +108,10 @@ export class TracksPageComponent implements OnInit {
       artist: this.artist(),
       genre: this.genre()
     }).pipe(takeUntilDestroyed(this.destroyRef), delay(1000))
-      .subscribe((res: Collection) => {
-        if (isCollection(res)) {
+      .subscribe((res: TrackCollectionResponse | null) => {
+        if (res) {
           this.tracks.set(res.data);
           this.pageTotal.set(res.meta.total);
-        } else {
-          console.error('Invalid response format:', res);
         }
         this.loading.set(false);
       })
@@ -125,7 +120,7 @@ export class TracksPageComponent implements OnInit {
   createTrack(): void {
     const dialogRef = this.dialog.open<CreateEditTrackModalComponent>(CreateEditTrackModalComponent);
 
-    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted, _}) => {
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted}) => {
       if (submitted) {
         this.retrieveTracks();
       }
@@ -137,7 +132,7 @@ export class TracksPageComponent implements OnInit {
       data: track
     });
 
-    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted, _}) => {
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted}) => {
       if (submitted) {
         this.retrieveTracks();
       }

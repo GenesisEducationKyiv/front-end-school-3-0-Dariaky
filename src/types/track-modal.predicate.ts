@@ -1,5 +1,5 @@
 import {CreateEditModalData, DeleteTrackModalData} from "./track-modal.type";
-import {TrackSearchItem} from "./track-search-item.type";
+import { TrackSearchItem } from './track-api.type';
 
 export function isTrackData(data: DeleteTrackModalData): data is { track: TrackSearchItem } {
   return !!data.track && !data.tracks;

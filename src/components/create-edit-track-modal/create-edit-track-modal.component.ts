@@ -1,6 +1,6 @@
-import {Component, DestroyRef, inject, OnInit, signal} from "@angular/core";
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
   MAT_DIALOG_DATA,
@@ -9,18 +9,18 @@ import {
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle
-} from "@angular/material/dialog";
-import {MatButtonModule} from "@angular/material/button";
-import {MatInputModule} from "@angular/material/input";
-import {MatFormFieldModule} from "@angular/material/form-field";
+} from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
-import {TracksService} from "../../services";
-import {atLeastOneGenreValidator} from "../../shared/utils/validators";
-import {TrackCreateRequest, TrackSearchItem} from "../../types/track-search-item.type";
-import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {DEFAULT_COVER_IMAGE} from "../../shared/utils/default-cover";
-import {CreateEditModalData, TrackModalResult} from "../../types/track-modal.type";
-import {isTrackDataDefined} from "../../types/track-modal.predicate";
+import { TracksService } from "../../services";
+import { atLeastOneGenreValidator } from '../../shared/utils/validators';
+import { TrackCreateRequest, TrackSearchItem } from '../../types/track-api.type';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DEFAULT_COVER_IMAGE } from '../../shared/utils/default-cover';
+import { CreateEditModalData, TrackModalResult } from '../../types/track-modal.type';
+import { isTrackDataDefined } from '../../types/track-modal.predicate';
 
 
 @Component({
@@ -73,9 +73,9 @@ export class CreateEditTrackModalComponent implements OnInit {
       });
     }
 
-    this.tracksService.getGenres().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: string[]) => {
-      if (Array.isArray(res)) {
-        this.genres.set(res);
+    this.tracksService.getGenres().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((genres: string[] | null) => {
+      if (genres && Array.isArray(genres)) {
+        this.genres.set(genres);
       }
     })
   }
@@ -99,7 +99,8 @@ export class CreateEditTrackModalComponent implements OnInit {
     const trackUpdateObservable = isTrackDataDefined(this.trackData) ?
       this.tracksService.updateTrack(this.trackData.id, request) :
       this.tracksService.createTrack(request);
-    trackUpdateObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((response: TrackSearchItem) => {
+
+    trackUpdateObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((response: TrackSearchItem | null) => {
       this.submitted.set(false);
 
       this.dialogRef.close({ submitted: true, response: response } as TrackModalResult);

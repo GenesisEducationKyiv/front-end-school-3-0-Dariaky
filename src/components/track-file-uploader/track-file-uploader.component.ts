@@ -9,14 +9,14 @@ import {
   output,
   viewChild
 } from '@angular/core';
-import {delay, fromEvent} from "rxjs";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { delay, fromEvent } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import {MatButtonModule} from "@angular/material/button";
-import {MatSnackBar} from "@angular/material/snack-bar";
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
-import {ALLOWED_FILE_TYPES, MAX_FILE_SIZE, MIN_FILE_SIZE} from "../../shared/utils/audio-params";
-import {TracksService} from "../../services";
+import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE, MIN_FILE_SIZE } from '../../shared/utils/audio-params';
+import { TracksService } from '../../services';
 
 
 @Component({
@@ -94,7 +94,7 @@ export class TrackFileUploaderComponent implements AfterViewInit {
   }
 
   upload(file: File): void {
-      this.trackService.uploadTrackFile(this.trackId(), file).subscribe({
+      this.trackService.uploadTrackFile(this.trackId(), file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (_) => {
           this.openSnackBar('File uploaded successfully!');
           this.fileUploaded.emit();
@@ -106,7 +106,7 @@ export class TrackFileUploaderComponent implements AfterViewInit {
   }
 
   deleteFile(): void {
-    this.trackService.deleteTrackFile(this.trackId()).subscribe({
+    this.trackService.deleteTrackFile(this.trackId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (_) => {
         this.openSnackBar('File deleted successfully!');
         this.fileUploaded.emit();

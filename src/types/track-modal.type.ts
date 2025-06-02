@@ -1,4 +1,4 @@
-import {TrackSearchItem} from "./track-search-item.type";
+import { TrackSearchItem } from './track-api.type';
 
 export interface TrackModalResult {
   submitted: boolean;
