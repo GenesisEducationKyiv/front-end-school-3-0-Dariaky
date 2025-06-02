@@ -9,12 +9,15 @@ import {
   output,
   viewChild
 } from '@angular/core';
-import {MatButtonModule} from "@angular/material/button";
-import {TracksService} from "../../services";
 import {delay, fromEvent} from "rxjs";
-import {ALLOWED_FILE_TYPES, MAX_FILE_SIZE, MIN_FILE_SIZE} from "../../shared/utils/audio-params";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+
+import {MatButtonModule} from "@angular/material/button";
 import {MatSnackBar} from "@angular/material/snack-bar";
+
+import {ALLOWED_FILE_TYPES, MAX_FILE_SIZE, MIN_FILE_SIZE} from "../../shared/utils/audio-params";
+import {TracksService} from "../../services";
+
 
 @Component({
   selector: 'track-file-uploader',
@@ -57,20 +60,20 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 })
 
 export class TrackFileUploaderComponent implements AfterViewInit {
-  private readonly trackService = inject(TracksService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly snackBar = inject(MatSnackBar)
+  private readonly trackService = inject<TracksService>(TracksService);
+  private readonly destroyRef = inject<DestroyRef>(DestroyRef);
+  private readonly snackBar = inject<MatSnackBar>(MatSnackBar)
 
   fileUploadInput = viewChild<ElementRef>('fileUploadInput');
 
   trackId = input<string>('');
   trackAudioFile = input<string>('');
 
-  trackAudioFilePlayable = computed(() => this.trackAudioFile() ? `https://localhost:8000/data/uploads/${this.trackAudioFile()}` : '');
+  trackAudioFilePlayable = computed<string>(() => this.trackAudioFile() ? `https://localhost:8000/data/uploads/${this.trackAudioFile()}` : '');
 
   fileUploaded = output<void>();
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     if (this.fileUploadInput()) {
       fromEvent(this.fileUploadInput()?.nativeElement, 'change')
         .pipe(
@@ -79,7 +82,6 @@ export class TrackFileUploaderComponent implements AfterViewInit {
         )
         .subscribe(() => {
           const uploadedFile = this.fileUploadInput()?.nativeElement.files[0];
-          console.log('uploadedFile', uploadedFile);
           if (!this.isFileValid(uploadedFile)) {
             return;
           }
@@ -91,7 +93,7 @@ export class TrackFileUploaderComponent implements AfterViewInit {
     this.fileUploadInput()?.nativeElement.click();
   }
 
-  upload(file: File) {
+  upload(file: File): void {
       this.trackService.uploadTrackFile(this.trackId(), file).subscribe({
         next: (_) => {
           this.openSnackBar('File uploaded successfully!');
@@ -103,7 +105,7 @@ export class TrackFileUploaderComponent implements AfterViewInit {
       });
   }
 
-  deleteFile() {
+  deleteFile(): void {
     this.trackService.deleteTrackFile(this.trackId()).subscribe({
       next: (_) => {
         this.openSnackBar('File deleted successfully!');
@@ -146,7 +148,7 @@ export class TrackFileUploaderComponent implements AfterViewInit {
     return false;
   }
 
-  private openSnackBar(message: string) {
+  private openSnackBar(message: string): void {
     this.snackBar.open(message, 'Close', { duration: 5000 });
   }
 }

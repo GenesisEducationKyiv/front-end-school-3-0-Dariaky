@@ -1,20 +1,23 @@
 import {Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, viewChild} from '@angular/core';
-import {TracksService} from "../../services";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TrackOrder, TrackSearchItem, TrackSort} from "../../types/track-search-item.type";
+import {debounceTime, delay, distinctUntilChanged, Subject} from "rxjs";
+
 import {MatButtonModule} from "@angular/material/button";
 import {MatDialog} from "@angular/material/dialog";
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {MatOption, MatSelect, MatSelectModule} from "@angular/material/select";
+import {MatInputModule} from "@angular/material/input";
+import {MatProgressSpinner} from "@angular/material/progress-spinner";
+import {MatCheckbox} from "@angular/material/checkbox";
+
+import {isCollection} from "../../types/track-search-item.predicate";
+import {Collection, TrackOrder, TrackSearchItem, TrackSort} from "../../types/track-search-item.type";
 import {CreateEditTrackModalComponent} from "../create-edit-track-modal/create-edit-track-modal.component";
 import {DeleteTrackModalComponent} from "../delete-track-modal/delete-track-modal.component";
 import {TrackFileUploaderComponent} from "../track-file-uploader/track-file-uploader.component";
 import {DEFAULT_COVER_IMAGE} from "../../shared/utils/default-cover";
-import {MatFormFieldModule} from "@angular/material/form-field";
-import {MatOption, MatSelect, MatSelectModule} from "@angular/material/select";
-import {MatInputModule} from "@angular/material/input";
-import {debounceTime, delay, distinctUntilChanged, Subject} from "rxjs";
 import {PaginatorComponent} from "../../shared/paginator/paginator.component";
-import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {MatCheckbox} from "@angular/material/checkbox";
+import {TracksService} from "../../services";
 
 
 @Component({
@@ -22,12 +25,21 @@ import {MatCheckbox} from "@angular/material/checkbox";
   templateUrl: 'tracks-page.component.html',
   styleUrl: 'tracks-page.component.scss',
   standalone: true,
-  imports: [MatButtonModule, TrackFileUploaderComponent, MatFormFieldModule, MatSelectModule, MatInputModule, PaginatorComponent, MatProgressSpinner, MatCheckbox]
+  imports: [
+    MatButtonModule,
+    TrackFileUploaderComponent,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    PaginatorComponent,
+    MatProgressSpinner,
+    MatCheckbox,
+  ]
 })
 export class TracksPageComponent implements OnInit {
-  private readonly tracksService = inject(TracksService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly dialog = inject(MatDialog);
+  private readonly tracksService = inject<TracksService>(TracksService);
+  private readonly destroyRef = inject<DestroyRef>(DestroyRef);
+  private readonly dialog = inject<MatDialog>(MatDialog);
 
   DEFAULT_COVER_IMAGE = DEFAULT_COVER_IMAGE;
 
@@ -37,15 +49,14 @@ export class TracksPageComponent implements OnInit {
   sortSelect = viewChild<MatSelect>('sortSelect');
   trackSearch = viewChild<ElementRef>('trackSearch');
 
-  private searchSubject = new Subject<string>();
   tracks = signal<TrackSearchItem[]>([]);
   originalTracks = signal<TrackSearchItem[]>([]);
   loading = signal<boolean>(false);
   selectedTracks = signal<string[]>([]);
 
   // Pagination and Filters
-  page = signal(1);
-  limit = signal(10);
+  page = signal<number>(1);
+  limit = signal<number>(10);
   pageTotal = signal<number>(0);
   sort = signal<TrackSort>('createdAt');
   order = signal<TrackOrder>('desc');
@@ -53,29 +64,37 @@ export class TracksPageComponent implements OnInit {
   artist = signal<string>('');
   genre = signal<string>('');
 
-  artistsAvailable = computed(() => this.originalTracks().length ? [...new Set(this.originalTracks().map((track) => track.artist))] : []);
+  artistsAvailable = computed<string[]>(() => this.originalTracks().length ? [...new Set(this.originalTracks().map((track) => track.artist))] : []);
   genresAvailable = signal<string[]>([]);
 
-  ngOnInit() {
+  private searchSubject = new Subject<string>();
+
+  ngOnInit(): void {
     this.loading.set(true);
     this.tracksService.getTracks().pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((res) => {
-        this.tracks.set(res.data ?? []);
-        this.originalTracks.set(res.data ?? []);
-        this.pageTotal.set(res.meta.total);
+      .subscribe((res: Collection) => {
+        if (isCollection(res)) {
+          this.tracks.set(res.data);
+          this.originalTracks.set(res.data);
+          this.pageTotal.set(res.meta.total);
+        } else {
+          console.error('Invalid response format:', res);
+        }
         this.loading.set(false);
       })
 
     this.tracksService.getGenres().pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((genres) => {
-        this.genresAvailable.set(genres);
+      .subscribe((genres: string[]) => {
+        if (Array.isArray(genres)) {
+          this.genresAvailable.set(genres);
+        }
       });
 
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe((searchTerm) => {
+    ).subscribe((searchTerm: string) => {
       this.search.set(searchTerm);
       this.retrieveTracks();
     });
@@ -92,19 +111,21 @@ export class TracksPageComponent implements OnInit {
       artist: this.artist(),
       genre: this.genre()
     }).pipe(takeUntilDestroyed(this.destroyRef), delay(1000))
-      .subscribe((res) => {
-        this.tracks.set(res.data ?? []);
-        this.pageTotal.set(res.meta.total);
+      .subscribe((res: Collection) => {
+        if (isCollection(res)) {
+          this.tracks.set(res.data);
+          this.pageTotal.set(res.meta.total);
+        } else {
+          console.error('Invalid response format:', res);
+        }
         this.loading.set(false);
       })
   }
 
   createTrack(): void {
-    const dialogRef = this.dialog.open(CreateEditTrackModalComponent, {
-      data: null
-    });
+    const dialogRef = this.dialog.open<CreateEditTrackModalComponent>(CreateEditTrackModalComponent);
 
-    dialogRef.afterClosed().subscribe(({submitted, response}) => {
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted, _}) => {
       if (submitted) {
         this.retrieveTracks();
       }
@@ -112,11 +133,11 @@ export class TracksPageComponent implements OnInit {
   }
 
   editTrack(track: TrackSearchItem): void {
-    const dialogRef = this.dialog.open(CreateEditTrackModalComponent, {
+    const dialogRef = this.dialog.open<CreateEditTrackModalComponent>(CreateEditTrackModalComponent, {
       data: track
     });
 
-    dialogRef.afterClosed().subscribe(({submitted, response}) => {
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted, _}) => {
       if (submitted) {
         this.retrieveTracks();
       }
@@ -124,14 +145,13 @@ export class TracksPageComponent implements OnInit {
   }
 
   deleteTrack(track: TrackSearchItem): void {
-    const dialogRef = this.dialog.open(DeleteTrackModalComponent, {
+    const dialogRef = this.dialog.open<DeleteTrackModalComponent>(DeleteTrackModalComponent, {
       data: {
         track: track,
-        tracks: null,
       }
     });
 
-    dialogRef.afterClosed().subscribe(({submitted, response}) => {
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted}) => {
       if (submitted) {
         this.retrieveTracks();
       }
@@ -153,8 +173,9 @@ export class TracksPageComponent implements OnInit {
     this.retrieveTracks();
   }
 
-  searchChanged(search: any) {
-    this.searchSubject.next(search.target.value);
+  searchChanged($event: Event): void {
+    const inputElement = $event.target as HTMLInputElement;
+    this.searchSubject.next(inputElement.value);
   }
 
   artistChanged(artist: string): void {
@@ -167,7 +188,7 @@ export class TracksPageComponent implements OnInit {
     this.retrieveTracks();
   }
 
-  reset() {
+  reset(): void {
     this.page.set(1);
     this.limit.set(10);
     this.sort.set('createdAt');
@@ -197,15 +218,14 @@ export class TracksPageComponent implements OnInit {
     }
   }
 
-  deleteMultiple() {
-    const dialogRef = this.dialog.open(DeleteTrackModalComponent, {
+  deleteMultiple(): void {
+    const dialogRef = this.dialog.open<DeleteTrackModalComponent>(DeleteTrackModalComponent, {
       data: {
-        track: null,
         tracks: this.selectedTracks(),
       }
     });
 
-    dialogRef.afterClosed().subscribe(({submitted, response}) => {
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted}) => {
       if (submitted) {
         this.retrieveTracks();
       }

@@ -8,7 +8,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
   providedIn: 'root',
 })
 export class TracksService {
-  private readonly http = inject(HttpClient);
+  private readonly http = inject<HttpClient>(HttpClient);
 
   private readonly baseUrl = 'http://localhost:8000/api';
 
