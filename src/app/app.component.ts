@@ -12,5 +12,5 @@ import {RouterLink, RouterOutlet} from '@angular/router';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Music Tracks Library';
+  title: string = 'Music Tracks Library';
 }

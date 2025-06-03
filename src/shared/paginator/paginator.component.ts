@@ -1,5 +1,7 @@
-import {Component, computed, input, output, signal} from '@angular/core';
-import {MatButtonModule} from "@angular/material/button";
+import { Component, computed, input, output, signal } from '@angular/core';
+
+import { MatButtonModule } from '@angular/material/button';
+
 
 @Component({
   selector: 'paginator',
@@ -26,7 +28,7 @@ export class PaginatorComponent {
 
   currentPage = signal<number>(1);
 
-  totalPages = computed(() => Math.ceil(this.length() / this.pageSize()));
+  totalPages = computed<number>(() => Math.ceil(this.length() / this.pageSize()));
 
   nextPage(): void {
     if (this.currentPage() < this.totalPages()) {

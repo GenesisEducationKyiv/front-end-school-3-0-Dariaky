@@ -1,5 +1,8 @@
-import {Component, DestroyRef, inject, signal} from '@angular/core';
-import {MatButtonModule} from "@angular/material/button";
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -7,11 +10,12 @@ import {
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle
-} from "@angular/material/dialog";
-import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {TracksService} from "../../services";
-import {TrackSearchItem} from "../../types/track-search-item.type";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+} from '@angular/material/dialog';
+
+import { TracksService } from "../../services";
+import { DeleteTrackModalData, TrackModalResult } from '../../types/track-modal.type';
+import { isTrackData, isTracksData } from '../../types/track-modal.predicate';
+
 
 @Component({
   selector: 'delete-track-modal',
@@ -28,30 +32,30 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 })
 
 export class DeleteTrackModalComponent {
-  private readonly tracksService = inject(TracksService);
-  private readonly dialogRef = inject(MatDialogRef<DeleteTrackModalComponent>);
+  private readonly tracksService = inject<TracksService>(TracksService);
+  private readonly dialogRef = inject<MatDialogRef<DeleteTrackModalComponent>>(MatDialogRef<DeleteTrackModalComponent>);
   private readonly destroyRef = inject(DestroyRef);
-  public readonly trackData = inject<{ track: TrackSearchItem, tracks: string[] }>(MAT_DIALOG_DATA);
+  public readonly trackData = inject<DeleteTrackModalData>(MAT_DIALOG_DATA);
 
   submitted = signal<boolean>(false);
 
   submit(): void {
     this.submitted.set(true);
 
-    if (this.trackData.track) {
+    if (isTrackData(this.trackData)) {
       this.tracksService.deleteTrack(this.trackData.track.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
         this.submitted.set(false);
-        this.dialogRef.close({submitted: true, response: null});
+        this.dialogRef.close({submitted: true} as TrackModalResult);
       })
-    } else {
+    } else if (isTracksData(this.trackData)) {
       this.tracksService.deleteTracks(this.trackData.tracks).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
         this.submitted.set(false);
-        this.dialogRef.close({submitted: true, response: null});
+        this.dialogRef.close({submitted: true} as TrackModalResult);
       })
     }
   }
 
-  close() {
-    this.dialogRef.close({submitted: false, response: null});
+  close(): void {
+    this.dialogRef.close({submitted: false} as TrackModalResult);
   }
 }

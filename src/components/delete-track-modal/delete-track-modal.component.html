@@ -6,10 +6,10 @@
   }
   @else {
     @if (trackData.track) {
-      <p>Are you sure you want to delete the track "{{trackData?.track?.title}}"?</p>
+      <p>Are you sure you want to delete the track "{{trackData.track.title}}"?</p>
     }
-    @else {
-      <p>Are you sure you want to delete {{trackData?.tracks?.length}} track{{trackData?.tracks?.length === 1 ? '' : 's'}}?</p>
+    @else if (trackData.tracks) {
+      <p>Are you sure you want to delete {{trackData.tracks.length}} track{{trackData.tracks.length === 1 ? '' : 's'}}?</p>
     }
   }
 </mat-dialog-content>

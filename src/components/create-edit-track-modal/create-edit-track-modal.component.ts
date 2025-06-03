@@ -1,21 +1,26 @@
-import {Component, DestroyRef, inject, OnInit, signal} from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 import {
   MAT_DIALOG_DATA,
-  MatDialogActions, MatDialogClose,
+  MatDialogActions,
+  MatDialogClose,
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle
-} from "@angular/material/dialog";
-import {MatButtonModule} from "@angular/material/button";
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {MatInputModule} from "@angular/material/input";
-import {MatFormFieldModule} from "@angular/material/form-field";
-import {TracksService} from "../../services";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {atLeastOneGenreValidator} from "../../shared/utils/validators";
-import {TrackCreateRequest, TrackSearchItem} from "../../types/track-search-item.type";
-import {MatProgressSpinner} from "@angular/material/progress-spinner";
-import {DEFAULT_COVER_IMAGE} from "../../shared/utils/default-cover";
+} from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+
+import { TracksService } from "../../services";
+import { atLeastOneGenreValidator } from '../../shared/utils/validators';
+import { TrackCreateRequest, TrackSearchItem } from '../../types/track-api.type';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DEFAULT_COVER_IMAGE } from '../../shared/utils/default-cover';
+import { CreateEditModalData, TrackModalResult } from '../../types/track-modal.type';
+import { isTrackDataDefined } from '../../types/track-modal.predicate';
 
 
 @Component({
@@ -37,23 +42,19 @@ import {DEFAULT_COVER_IMAGE} from "../../shared/utils/default-cover";
   ],
 })
 export class CreateEditTrackModalComponent implements OnInit {
-  private readonly tracksService = inject(TracksService);
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly dialogRef = inject(MatDialogRef<CreateEditTrackModalComponent>);
-  private readonly trackData = inject<TrackSearchItem>(MAT_DIALOG_DATA);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly tracksService = inject<TracksService>(TracksService);
+  private readonly formBuilder = inject<FormBuilder>(FormBuilder);
+  private readonly dialogRef = inject<MatDialogRef<CreateEditTrackModalComponent>>(MatDialogRef<CreateEditTrackModalComponent>);
+  private readonly trackData = inject<CreateEditModalData>(MAT_DIALOG_DATA);
+  private readonly destroyRef = inject<DestroyRef>(DestroyRef);
 
   trackForm!: FormGroup;
   genreClicked = signal<boolean>(false);
   genres = signal<string[]>([]);
   submitted = signal<boolean>(false);
-  creationMode = signal<boolean>(true);
+  editMode = signal<boolean>(isTrackDataDefined(this.trackData));
 
-  ngOnInit() {
-    if (this.trackData) {
-      this.creationMode.set(false);
-    }
-
+  ngOnInit(): void {
     this.trackForm = this.formBuilder.group({
       title: ['', Validators.required],
       artist: ['', Validators.required],
@@ -62,7 +63,7 @@ export class CreateEditTrackModalComponent implements OnInit {
       coverImage: ['']
     });
 
-    if (!this.creationMode()) {
+    if (isTrackDataDefined(this.trackData)) {
       this.trackForm.patchValue({
         title: this.trackData.title,
         artist: this.trackData.artist,
@@ -72,13 +73,15 @@ export class CreateEditTrackModalComponent implements OnInit {
       });
     }
 
-    this.tracksService.getGenres().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res) => {
-      this.genres.set(res ?? []);
+    this.tracksService.getGenres().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((genres: string[] | null) => {
+      if (genres && Array.isArray(genres)) {
+        this.genres.set(genres);
+      }
     })
   }
 
   close(): void {
-    this.dialogRef.close({submitted: false, response: null});
+    this.dialogRef.close({ submitted: true } as TrackModalResult);
   }
 
   submit(): void {
@@ -87,19 +90,24 @@ export class CreateEditTrackModalComponent implements OnInit {
     }
 
     this.submitted.set(true);
-    const request = {
+
+    const request: TrackCreateRequest = {
       ...this.trackForm.value,
       coverImage: this.trackForm.value.coverImage ? this.trackForm.value.coverImage : DEFAULT_COVER_IMAGE,
-    } as TrackCreateRequest;
+    };
 
-    const trackUpdateObservable = this.creationMode() ? this.tracksService.createTrack(request) : this.tracksService.updateTrack(this.trackData.id, request);
-    trackUpdateObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((response) => {
+    const trackUpdateObservable = isTrackDataDefined(this.trackData) ?
+      this.tracksService.updateTrack(this.trackData.id, request) :
+      this.tracksService.createTrack(request);
+
+    trackUpdateObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((response: TrackSearchItem | null) => {
       this.submitted.set(false);
-      this.dialogRef.close({submitted: true, response: response});
+
+      this.dialogRef.close({ submitted: true, response: response } as TrackModalResult);
     })
   }
 
-  toggleGenre(index: number) {
+  toggleGenre(index: number): void {
     this.genreClicked.set(true);
     const genres = this.trackForm.get('genres')?.value;
     const genre = this.genres()[index];
