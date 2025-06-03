@@ -5,9 +5,9 @@ export interface TrackModalResult {
   response?: TrackSearchItem;
 }
 
-export type DeleteTrackModalData =
-  | { track: TrackSearchItem; tracks?: undefined }
-  | { tracks: string[]; track?: undefined };
+export type DeleteTrackModalData<T = TrackSearchItem> =
+    | { track: T; tracks?: undefined }
+    | { tracks: string[]; track?: undefined };
 
 export type CreateEditModalData =
   | TrackSearchItem

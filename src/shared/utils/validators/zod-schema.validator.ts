@@ -11,6 +11,7 @@ export const zodSchemaValidator = <T extends z.ZodSchema>(schema: T) => {
         } catch (error) {
           console.log(error);
           // Still return data even if incorrectly formatted not to break application
+          // (so api response validation doesn't break the flow, but rather informs about the issue)
           return obj;
         }
       })
