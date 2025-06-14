@@ -1,61 +1,93 @@
-import {inject, Injectable} from '@angular/core';
-import {Collection, TrackCreateRequest, TrackParams, TrackSearchItem} from '../types/track-search-item.type';
-import {Observable} from 'rxjs';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { catchError, Observable, of } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+
+import {
+  TrackCollectionResponse,
+  TrackCollectionResponseSchema,
+  TrackCreateRequest,
+  TrackParams,
+  TracksDeleteResponse,
+  TracksDeleteResponseSchema,
+  TrackSearchItem,
+  TrackSearchItemSchema
+} from '../types/track-api.type';
+import { zodSchemaValidator } from '../shared/utils/validators';
 
 
 @Injectable({
   providedIn: 'root',
 })
 export class TracksService {
-  private readonly http = inject(HttpClient);
+  private readonly http = inject<HttpClient>(HttpClient);
 
   private readonly baseUrl = 'http://localhost:8000/api';
 
-  getTracks(params: TrackParams = {}): Observable<Collection> {
-    return this.http.get<Collection>(
+  getTracks(params: TrackParams = {}): Observable<TrackCollectionResponse | null> {
+    return this.http.get<TrackCollectionResponse>(
       `${this.baseUrl}/tracks`,
       { params: this.transformToHttpParams(params) }
+    ).pipe(
+      zodSchemaValidator(TrackCollectionResponseSchema),
+      catchError((_) => of(null))
     );
   }
 
-  createTrack(trackRequest: TrackCreateRequest): Observable<TrackSearchItem> {
-    return this.http.post<TrackSearchItem>(
-      `${this.baseUrl}/tracks`, trackRequest
+  createTrack(trackRequest: TrackCreateRequest): Observable<TrackSearchItem | null> {
+    return this.http.post<TrackSearchItem>(`${this.baseUrl}/tracks`, trackRequest).pipe(
+      zodSchemaValidator(TrackSearchItemSchema),
+      catchError((_) => of(null))
     );
   }
 
-  updateTrack(id: string, trackRequest: TrackCreateRequest): Observable<TrackSearchItem> {
+  updateTrack(id: string, trackRequest: TrackCreateRequest): Observable<TrackSearchItem | null> {
     return this.http.put<TrackSearchItem>(
       `${this.baseUrl}/tracks/${id}`, trackRequest
+    ).pipe(
+      zodSchemaValidator(TrackSearchItemSchema),
+      catchError((_) => of(null))
     );
   }
 
   deleteTrack(id: string): Observable<void> {
     return this.http.delete<void>(
       `${this.baseUrl}/tracks/${id}`,
+    ).pipe(
+      catchError((_) => of())
     );
   }
 
-  uploadTrackFile(id: string, file: File): Observable<TrackSearchItem> {
+  uploadTrackFile(id: string, file: File): Observable<TrackSearchItem | null> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post<TrackSearchItem>(`${this.baseUrl}/tracks/${id}/upload`, formData);
+    return this.http.post<TrackSearchItem>(`${this.baseUrl}/tracks/${id}/upload`, formData).pipe(
+      zodSchemaValidator(TrackSearchItemSchema),
+      catchError((_) => of(null))
+    );
   }
 
-  deleteTrackFile(id: string): Observable<TrackSearchItem> {
-    return this.http.delete<TrackSearchItem>(`${this.baseUrl}/tracks/${id}/file`);
+  deleteTrackFile(id: string): Observable<TrackSearchItem | null> {
+    return this.http.delete<TrackSearchItem>(`${this.baseUrl}/tracks/${id}/file`).pipe(
+      zodSchemaValidator(TrackSearchItemSchema),
+      catchError((_) => of(null))
+    );
   }
 
-  deleteTracks(ids: string[]): Observable<{ success: string[]; failed: string[] }> {
-    return this.http.post<{ success: string[]; failed: string[] }>(`${this.baseUrl}/tracks/delete`, {ids: ids});
+  deleteTracks(ids: string[]): Observable<TracksDeleteResponse | null> {
+    return this.http.post<{ success: string[]; failed: string[] }>(`${this.baseUrl}/tracks/delete`, {ids: ids})
+      .pipe(
+        zodSchemaValidator(TracksDeleteResponseSchema),
+        catchError((_) => of(null))
+      );
   }
 
-  getGenres(): Observable<string[]> {
+  getGenres(): Observable<string[] | null> {
     return this.http.get<string[]>(
       `${this.baseUrl}/genres`,
-    );
+    ).pipe(
+      catchError((_) => of(null))
+    )
   }
 
   private transformToHttpParams(params: TrackParams): HttpParams {
