@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>{{creationMode() ? 'Create' : 'Edit'}} a track</h2>
+<h2 mat-dialog-title>{{editMode() ? 'Edit' : 'Create'}} a track</h2>
 <mat-dialog-content>
 
   @if (submitted()) {
@@ -57,6 +57,6 @@
 
 <mat-dialog-actions [align]="'end'">
   <button mat-button (click)="close()" [attr.aria-disabled]="submitted()" [disabled]="submitted()">Close</button>
-  <button data-testid="submit-button" [attr.aria-disabled]="trackForm.invalid || submitted()" mat-button cdkFocusInitial (click)="submit()" [disabled]="trackForm.invalid || submitted()">{{creationMode() ? 'Create' : 'Edit'}}</button>
+  <button data-testid="submit-button" [attr.aria-disabled]="trackForm.invalid || submitted()" mat-button cdkFocusInitial (click)="submit()" [disabled]="trackForm.invalid || submitted()">{{editMode() ? 'Edit': 'Create'}}</button>
 </mat-dialog-actions>
 
