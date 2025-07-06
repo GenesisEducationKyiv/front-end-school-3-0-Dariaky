@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { TracksService } from './tracks.service';
-import { TrackCollectionResponse, TrackSearchItem } from '../types/track-api.type';
+import { TracksService } from '../../src/services/tracks.service';
+import { TrackCollectionResponse, TrackSearchItem } from '../../src/types/track-api.type';
 
 describe('TracksService', () => {
   let service: TracksService;
@@ -27,8 +27,13 @@ describe('TracksService', () => {
 
   it('should fetch tracks', () => {
     const mockResponse: TrackCollectionResponse = {
-      tracks: [],
-      total: 0,
+      data: [],
+      meta: {
+        total: 0,
+        page: 0,
+        limit: 0,
+        totalPages: 0,
+      },
     };
 
     service.getTracks().subscribe((response) => {
@@ -41,8 +46,23 @@ describe('TracksService', () => {
   });
 
   it('should create a track', () => {
-    const mockTrack: TrackSearchItem = { id: '1', name: 'Test Track' };
-    const trackRequest = { name: 'Test Track' };
+    const mockTrack: TrackSearchItem = {
+      id: '1',
+      title: 'Test Track',
+      artist: 'Test Artist',
+      album: 'Test Album',
+      genres: ['Test1', 'Test2'],
+      slug: 'Test',
+      createdAt: '2023-10-01T12:00:00Z',
+      updatedAt: '2023-10-01T12:00:00Z',
+    };
+    const trackRequest = {
+      title: 'Test Track',
+      artist: 'Test Artist',
+      album: 'Test Album',
+      genres: ['Test1', 'Test2'],
+      coverImage: '',
+    };
 
     service.createTrack(trackRequest).subscribe((response) => {
       expect(response).toEqual(mockTrack);
@@ -55,8 +75,23 @@ describe('TracksService', () => {
   });
 
   it('should update a track', () => {
-    const mockTrack: TrackSearchItem = { id: '1', name: 'Updated Track' };
-    const trackRequest = { name: 'Updated Track' };
+    const mockTrack: TrackSearchItem = {
+      id: '1',
+      title: 'Test Track',
+      artist: 'Test Artist',
+      album: 'Test Album',
+      genres: ['Test1', 'Test2'],
+      slug: 'Test',
+      createdAt: '2023-10-01T12:00:00Z',
+      updatedAt: '2023-10-01T12:00:00Z',
+    };
+    const trackRequest = {
+      title: 'Test Track',
+      artist: 'Test Artist',
+      album: 'Test Album',
+      genres: ['Test1', 'Test2'],
+      coverImage: '',
+    };
 
     service.updateTrack('1', trackRequest).subscribe((response) => {
       expect(response).toEqual(mockTrack);
@@ -70,7 +105,7 @@ describe('TracksService', () => {
 
   it('should delete a track', () => {
     service.deleteTrack('1').subscribe((response) => {
-      expect(response).toBeUndefined();
+      expect(response).toBeNull();
     });
 
     const req = httpMock.expectOne('http://localhost:8000/api/tracks/1');
@@ -79,7 +114,16 @@ describe('TracksService', () => {
   });
 
   it('should upload a track file', () => {
-    const mockTrack: TrackSearchItem = { id: '1', name: 'Track with File' };
+    const mockTrack: TrackSearchItem = {
+      id: '1',
+      title: 'Test Track',
+      artist: 'Test Artist',
+      album: 'Test Album',
+      genres: ['Test1', 'Test2'],
+      slug: 'Test',
+      createdAt: '2023-10-01T12:00:00Z',
+      updatedAt: '2023-10-01T12:00:00Z',
+    };
     const mockFile = new File(['content'], 'test.mp3');
 
     service.uploadTrackFile('1', mockFile).subscribe((response) => {
@@ -93,7 +137,16 @@ describe('TracksService', () => {
   });
 
   it('should delete a track file', () => {
-    const mockTrack: TrackSearchItem = { id: '1', name: 'Track without File' };
+    const mockTrack: TrackSearchItem = {
+      id: '1',
+      title: 'Test Track',
+      artist: 'Test Artist',
+      album: 'Test Album',
+      genres: ['Test1', 'Test2'],
+      slug: 'Test',
+      createdAt: '2023-10-01T12:00:00Z',
+      updatedAt: '2023-10-01T12:00:00Z',
+    };
 
     service.deleteTrackFile('1').subscribe((response) => {
       expect(response).toEqual(mockTrack);

@@ -192,10 +192,10 @@ export class TracksPageComponent implements OnInit {
     this.artist.set('');
     this.genre.set('');
 
-    this.artistsSelect()?.options.forEach((data: MatOption) => data.deselect());
-    this.genresSelect()?.options.forEach((data: MatOption) => data.deselect());
-    this.orderSelect()?.options.forEach((data: MatOption) => data.deselect());
-    this.sortSelect()?.options.forEach((data: MatOption) => data.deselect());
+    this.artistsSelect()?.options?.forEach((data: MatOption) => data.deselect());
+    this.genresSelect()?.options?.forEach((data: MatOption) => data.deselect());
+    this.orderSelect()?.options?.forEach((data: MatOption) => data.deselect());
+    this.sortSelect()?.options?.forEach((data: MatOption) => data.deselect());
 
     const trackSearchInput = this.trackSearch()?.nativeElement;
     if (trackSearchInput) {

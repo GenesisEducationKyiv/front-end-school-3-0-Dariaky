@@ -74,7 +74,7 @@ export class TrackFileUploaderComponent implements AfterViewInit {
   fileUploaded = output<void>();
 
   ngAfterViewInit(): void {
-    if (this.fileUploadInput()) {
+    // if (this.fileUploadInput()) {
       fromEvent(this.fileUploadInput()?.nativeElement, 'change')
         .pipe(
           takeUntilDestroyed(this.destroyRef),
@@ -87,7 +87,8 @@ export class TrackFileUploaderComponent implements AfterViewInit {
           }
           this.upload(uploadedFile);
         });
-    }}
+    // }
+  }
 
   openFileUploadInput(): void {
     this.fileUploadInput()?.nativeElement.click();

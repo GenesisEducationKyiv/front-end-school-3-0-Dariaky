@@ -1,27 +1,32 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TracksPageComponent } from './tracks-page.component';
-import { TracksService } from '../../services';
-import { MatDialog } from '@angular/material/dialog';
+import { TracksPageComponent } from '../../src/components/tracks-page/tracks-page.component';
+import { TracksService } from '../../src/services';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import { of } from 'rxjs';
-import { TrackCollectionResponse, TrackSearchItem } from '../../types/track-api.type';
+import { TrackCollectionResponse, TrackSearchItem } from '../../src/types/track-api.type';
+
 
 describe('TracksPageComponent', () => {
   let component: TracksPageComponent;
   let fixture: ComponentFixture<TracksPageComponent>;
   let tracksServiceMock: jasmine.SpyObj<TracksService>;
   let matDialogMock: jasmine.SpyObj<MatDialog>;
+  let matDialogRefMock: jasmine.SpyObj<MatDialogRef<any>>;
 
   beforeEach(async () => {
     tracksServiceMock = jasmine.createSpyObj('TracksService', ['getTracks', 'getGenres']);
     matDialogMock = jasmine.createSpyObj('MatDialog', ['open']);
+    matDialogRefMock = jasmine.createSpyObj('MatDialogRef', ['afterClosed']);
 
     await TestBed.configureTestingModule({
-      declarations: [TracksPageComponent],
+      imports: [TracksPageComponent], // As TracksPageComponent is standalone
       providers: [
         { provide: TracksService, useValue: tracksServiceMock },
         { provide: MatDialog, useValue: matDialogMock },
+        { provide: MatDialogRef, useValue: matDialogRefMock }
       ],
     }).compileComponents();
+
 
     fixture = TestBed.createComponent(TracksPageComponent);
     component = fixture.componentInstance;
@@ -33,10 +38,24 @@ describe('TracksPageComponent', () => {
 
   it('should initialize tracks and genres on ngOnInit', () => {
     const mockTracksResponse: TrackCollectionResponse = {
-      data: [{ id: '1', name: 'Track 1', artist: 'Artist 1', genre: 'Genre 1' }],
-      meta: { total: 1 },
+      data: [{
+        id: '1',
+        title: 'Test Track',
+        artist: 'Test Artist',
+        album: 'Test Album',
+        genres: ['Test1', 'Test2'],
+        slug: 'Test',
+        createdAt: '2023-10-01T12:00:00Z',
+        updatedAt: '2023-10-01T12:00:00Z',
+      }],
+      meta: {
+        total: 0,
+        page: 0,
+        limit: 0,
+        totalPages: 0,
+      }
     };
-    const mockGenres = ['Genre 1', 'Genre 2'];
+    const mockGenres = ['Test1', 'Test2'];
 
     tracksServiceMock.getTracks.and.returnValue(of(mockTracksResponse));
     tracksServiceMock.getGenres.and.returnValue(of(mockGenres));
@@ -51,8 +70,13 @@ describe('TracksPageComponent', () => {
 
   it('should retrieve tracks with filters', () => {
     const mockTracksResponse: TrackCollectionResponse = {
-      data: [{ id: '1', name: 'Filtered Track', artist: 'Artist 1', genre: 'Genre 1' }],
-      meta: { total: 1 },
+      data: [],
+      meta: {
+        total: 0,
+        page: 0,
+        limit: 0,
+        totalPages: 0,
+      }
     };
 
     tracksServiceMock.getTracks.and.returnValue(of(mockTracksResponse));
@@ -72,7 +96,10 @@ describe('TracksPageComponent', () => {
   });
 
   it('should open dialog for creating a track', () => {
-    matDialogMock.open.and.returnValue({ afterClosed: () => of({ submitted: true }) } as any);
+    const dialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<any>>;
+    dialogRef.afterClosed.and.returnValue(of());
+    const dialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+    dialog.open.and.returnValue(dialogRef);
 
     component.createTrack();
 
@@ -80,8 +107,20 @@ describe('TracksPageComponent', () => {
   });
 
   it('should open dialog for editing a track', () => {
-    const mockTrack: TrackSearchItem = { id: '1', name: 'Track 1', artist: 'Artist 1', genre: 'Genre 1' };
-    matDialogMock.open.and.returnValue({ afterClosed: () => of({ submitted: true }) } as any);
+    const mockTrack: TrackSearchItem = {
+      id: '1',
+      title: 'Test Track',
+      artist: 'Test Artist',
+      album: 'Test Album',
+      genres: ['Test1', 'Test2'],
+      slug: 'Test',
+      createdAt: '2023-10-01T12:00:00Z',
+      updatedAt: '2023-10-01T12:00:00Z',
+    };
+    const dialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<any>>;
+    dialogRef.afterClosed.and.returnValue(of());
+    const dialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+    dialog.open.and.returnValue(dialogRef);
 
     component.editTrack(mockTrack);
 
@@ -89,8 +128,21 @@ describe('TracksPageComponent', () => {
   });
 
   it('should open dialog for deleting a track', () => {
-    const mockTrack: TrackSearchItem = { id: '1', name: 'Track 1', artist: 'Artist 1', genre: 'Genre 1' };
-    matDialogMock.open.and.returnValue({ afterClosed: () => of({ submitted: true }) } as any);
+    const mockTrack: TrackSearchItem = {
+      id: '1',
+      title: 'Test Track',
+      artist: 'Test Artist',
+      album: 'Test Album',
+      genres: ['Test1', 'Test2'],
+      slug: 'Test',
+      createdAt: '2023-10-01T12:00:00Z',
+      updatedAt: '2023-10-01T12:00:00Z',
+    };
+
+    const dialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<any>>;
+    dialogRef.afterClosed.and.returnValue(of());
+    const dialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+    dialog.open.and.returnValue(dialogRef);
 
     component.deleteTrack(mockTrack);
 
@@ -109,6 +161,7 @@ describe('TracksPageComponent', () => {
     expect(component.search()).toBe('');
     expect(component.artist()).toBe('');
     expect(component.genre()).toBe('');
+
     expect(component.retrieveTracks).toHaveBeenCalled();
   });
 });
