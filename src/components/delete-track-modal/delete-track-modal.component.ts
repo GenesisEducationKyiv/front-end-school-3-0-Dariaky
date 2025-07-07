@@ -50,7 +50,6 @@ export class DeleteTrackModalComponent {
     } else if (isTracksData(this.trackData)) {
       this.tracksService.deleteTracks(this.trackData.tracks).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
         this.submitted.set(false);
-        console.log('HERE s');
         this.dialogRef.close({submitted: true} as TrackModalResult);
       })
     }
