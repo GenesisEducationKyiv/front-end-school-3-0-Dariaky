@@ -1,6 +1,7 @@
 import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, delay, distinctUntilChanged, Subject } from 'rxjs';
+import {combineLatest, debounceTime, distinctUntilChanged, filter, Subject} from 'rxjs';
+import { Store } from '@ngrx/store';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,13 +11,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCheckbox } from '@angular/material/checkbox';
 
-import { TrackCollectionResponse, TrackOrder, TrackSearchItem, TrackSort } from '../../types/track-api.type';
+import { TrackOrder, TrackSearchItem, TrackSort } from '../../types/track-api.type';
 import { CreateEditTrackModalComponent } from '../create-edit-track-modal/create-edit-track-modal.component';
 import { DeleteTrackModalComponent } from '../delete-track-modal/delete-track-modal.component';
 import { TrackFileUploaderComponent } from '../track-file-uploader/track-file-uploader.component';
 import { DEFAULT_COVER_IMAGE } from '../../shared/utils/default-cover';
 import { PaginatorComponent } from '../../shared/paginator/paginator.component';
-import { TracksService} from '../../services';
+import { TracksService } from '../../services';
+import { loadTracks } from '../../store/tracks/tracks.actions';
+import { selectTracksData, selectTracksMeta } from '../../store/tracks/tracks.selectors';
 
 
 @Component({
@@ -39,6 +42,7 @@ export class TracksPageComponent implements OnInit {
   private readonly tracksService = inject<TracksService>(TracksService);
   private readonly destroyRef = inject<DestroyRef>(DestroyRef);
   private readonly dialog = inject<MatDialog>(MatDialog);
+  private readonly store = inject<Store>(Store);
 
   DEFAULT_COVER_IMAGE = DEFAULT_COVER_IMAGE;
 
@@ -70,15 +74,25 @@ export class TracksPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading.set(true);
-    this.tracksService.getTracks().pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((res: (TrackCollectionResponse | null)) => {
-        if (res) {
-          this.tracks.set(res.data);
-          this.originalTracks.set(res.data);
-          this.pageTotal.set(res.meta.total);
-        }
-        this.loading.set(false);
-      })
+    this.store.dispatch(loadTracks({ params: {} }));
+
+    combineLatest([
+      // @ts-ignore
+      this.store.select(selectTracksData),
+      // @ts-ignore
+      this.store.select(selectTracksMeta),
+    ]).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      filter(([tracks, meta]) => tracks !== undefined && meta !== undefined),
+      distinctUntilChanged()
+    ).subscribe(([tracks, meta]) => {
+      if (!this.originalTracks().length) {
+        this.originalTracks.set(tracks || []);
+      }
+      this.tracks.set(tracks || []);
+      this.pageTotal.set(meta ? meta.total : 0);
+      this.loading.set(false);
+    });
 
     this.tracksService.getGenres().pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((genres: string[] | null) => {
@@ -99,22 +113,20 @@ export class TracksPageComponent implements OnInit {
 
   retrieveTracks(): void {
     this.loading.set(true);
-    this.tracksService.getTracks({
+    const params = {
       page: this.page(),
       limit: this.limit(),
       sort: this.sort(),
       order: this.order(),
       search: this.search(),
       artist: this.artist(),
-      genre: this.genre()
-    }).pipe(takeUntilDestroyed(this.destroyRef), delay(1000))
-      .subscribe((res: TrackCollectionResponse | null) => {
-        if (res) {
-          this.tracks.set(res.data);
-          this.pageTotal.set(res.meta.total);
-        }
-        this.loading.set(false);
-      })
+      genre: this.genre(),
+    };
+
+    // same as delay(1000)
+    setTimeout(() => {
+      this.store.dispatch(loadTracks({ params }));
+    }, 1000);
   }
 
   createTrack(): void {
