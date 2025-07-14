@@ -1,11 +1,12 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 
-import { MatButtonModule } from '@angular/material/button';
+import {MatButtonModule} from '@angular/material/button';
 
 
 @Component({
   selector: 'paginator',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatButtonModule],
   template: `
     <div data-testid="pagination" class="paginator">

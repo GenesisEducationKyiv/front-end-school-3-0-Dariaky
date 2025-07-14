@@ -1,22 +1,22 @@
-import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, delay, distinctUntilChanged, Subject } from 'rxjs';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, viewChild} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {debounceTime, delay, distinctUntilChanged, Subject} from 'rxjs';
 
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatOption, MatSelect, MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatCheckbox } from '@angular/material/checkbox';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDialog} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatOption, MatSelect, MatSelectModule} from '@angular/material/select';
+import {MatInputModule} from '@angular/material/input';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
+import {MatCheckbox} from '@angular/material/checkbox';
 
-import { TrackCollectionResponse, TrackOrder, TrackSearchItem, TrackSort } from '../../types/track-api.type';
-import { CreateEditTrackModalComponent } from '../create-edit-track-modal/create-edit-track-modal.component';
-import { DeleteTrackModalComponent } from '../delete-track-modal/delete-track-modal.component';
-import { TrackFileUploaderComponent } from '../track-file-uploader/track-file-uploader.component';
-import { DEFAULT_COVER_IMAGE } from '../../shared/utils/default-cover';
-import { PaginatorComponent } from '../../shared/paginator/paginator.component';
-import { TracksService} from '../../services';
+import {TrackCollectionResponse, TrackOrder, TrackSearchItem, TrackSort} from '../../types/track-api.type';
+import {CreateEditTrackModalComponent} from '../create-edit-track-modal/create-edit-track-modal.component';
+import {DeleteTrackModalComponent} from '../delete-track-modal/delete-track-modal.component';
+import {TrackFileUploaderComponent} from '../track-file-uploader/track-file-uploader.component';
+import {DEFAULT_COVER_IMAGE} from '../../shared/utils/default-cover';
+import {PaginatorComponent} from '../../shared/paginator/paginator.component';
+import {TracksService} from '../../services';
 
 
 @Component({
@@ -33,7 +33,8 @@ import { TracksService} from '../../services';
     PaginatorComponent,
     MatProgressSpinner,
     MatCheckbox,
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TracksPageComponent implements OnInit {
   private readonly tracksService = inject<TracksService>(TracksService);

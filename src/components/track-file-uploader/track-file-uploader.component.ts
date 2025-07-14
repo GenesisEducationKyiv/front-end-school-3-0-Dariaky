@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
@@ -22,6 +23,7 @@ import { TracksService } from '../../services';
 @Component({
   selector: 'track-file-uploader',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatButtonModule],
   template: `
     @if (trackAudioFile()) {
