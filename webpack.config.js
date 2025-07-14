@@ -13,5 +13,6 @@ module.exports = {
   mode: isProd ? 'production' : 'development',
   optimization: {
     usedExports: isProd, // Enable tree shaking only in production
-  }
+  },
+  devtool: isProd ? false : 'source-map', // Enable source maps in development
 };
