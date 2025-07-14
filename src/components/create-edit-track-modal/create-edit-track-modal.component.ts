@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -27,6 +27,7 @@ import { isTrackDataDefined } from '../../types/track-modal.predicate';
   selector: 'create-edit-track-modal',
   templateUrl: 'create-edit-track-modal.component.html',
   styleUrl: 'create-edit-track-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     MatFormFieldModule,
