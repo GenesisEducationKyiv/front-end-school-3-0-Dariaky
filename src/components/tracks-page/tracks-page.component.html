@@ -75,7 +75,7 @@
             <li [attr.data-testid]="'track-item-' + track.id" class="track-item">
               <div class="track-item__header">
                 <div>
-                  <img alt="Album cover" class="track-item__image" [src]="track?.coverImage ? track.coverImage : DEFAULT_COVER_IMAGE"/>
+                  <img width="40" height="40" alt="Album cover" class="track-item__image" [src]="track?.coverImage ? track.coverImage : DEFAULT_COVER_IMAGE"/>
 
                   <h2 [attr.data-testid]="'track-item-' + track.id + '-title'">{{track.title}}</h2>
                   <p [attr.data-testid]="'track-item-' + track.id + '-artist'">{{track.artist}}</p>

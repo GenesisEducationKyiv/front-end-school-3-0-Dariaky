@@ -1,16 +1,14 @@
 import { Routes } from '@angular/router';
-import {PageNotFoundComponent} from '../shared';
-import {TracksPageComponent} from "../components/tracks-page/tracks-page.component";
 
 export const routes: Routes = [
   {
     path: '',
-    component: TracksPageComponent,
+    loadComponent: () => import('../components/tracks-page/tracks-page.component').then(m => m.TracksPageComponent),
     pathMatch: 'full',
   },
   {
     path: '404',
-    component: PageNotFoundComponent,
+    loadComponent: () => import('../shared').then(m => m.PageNotFoundComponent),
   },
   {
     path: '**',

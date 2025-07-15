@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
+import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, delay, distinctUntilChanged, Subject } from 'rxjs';
@@ -36,7 +36,8 @@ import { TracksService} from '../../services';
     PaginatorComponent,
     MatProgressSpinner,
     MatCheckbox,
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TracksPageComponent implements OnInit {
   private readonly tracksService = inject<TracksService>(TracksService);
@@ -132,7 +133,9 @@ export class TracksPageComponent implements OnInit {
       })
   }
 
-  createTrack(): void {
+  async createTrack(): Promise<void> {
+    const { CreateEditTrackModalComponent } = await import('../create-edit-track-modal/create-edit-track-modal.component');
+
     const dialogRef = this.dialog.open<CreateEditTrackModalComponent>(CreateEditTrackModalComponent);
 
     dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted}) => {
@@ -142,7 +145,9 @@ export class TracksPageComponent implements OnInit {
     });
   }
 
-  editTrack(track: TrackSearchItem): void {
+  async editTrack(track: TrackSearchItem): Promise<void> {
+    const { CreateEditTrackModalComponent } = await import('../create-edit-track-modal/create-edit-track-modal.component');
+
     const dialogRef = this.dialog.open<CreateEditTrackModalComponent>(CreateEditTrackModalComponent, {
       data: track
     });
@@ -154,11 +159,15 @@ export class TracksPageComponent implements OnInit {
     });
   }
 
-  deleteTrack(track: TrackSearchItem): void {
-    const dialogRef = this.dialog.open<DeleteTrackModalComponent>(DeleteTrackModalComponent, {
-      data: {
-        track: track,
-      }
+  /**
+   * Delete modal is lazy loaded
+   * @param track
+   */
+  async deleteTrack(track: TrackSearchItem): Promise<void> {
+    const { DeleteTrackModalComponent } = await import('../delete-track-modal/delete-track-modal.component');
+
+    const dialogRef = this.dialog.open(DeleteTrackModalComponent, {
+      data: { track: track },
     });
 
     dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted}) => {
