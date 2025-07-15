@@ -89,7 +89,8 @@ export class TrackFileUploaderComponent implements AfterViewInit {
           }
           this.upload(uploadedFile);
         });
-    }}
+    }
+  }
 
   openFileUploadInput(): void {
     this.fileUploadInput()?.nativeElement.click();
