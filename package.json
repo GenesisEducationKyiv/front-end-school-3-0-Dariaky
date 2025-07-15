@@ -9,7 +9,7 @@
     "test": "ng test",
     "test:e2e": "playwright test",
     "lint": "ng lint",
-    "start:dev": "NODE_ENV=development npm run start",
+    "start:dev": "NODE_ENV=production npm run start",
     "build:prod": "NODE_ENV=production npm run build"
   },
   "private": true,
