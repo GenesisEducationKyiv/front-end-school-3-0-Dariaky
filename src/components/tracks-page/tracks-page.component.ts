@@ -132,7 +132,9 @@ export class TracksPageComponent implements OnInit {
       })
   }
 
-  createTrack(): void {
+  async createTrack(): Promise<void> {
+    const { CreateEditTrackModalComponent } = await import('../create-edit-track-modal/create-edit-track-modal.component');
+
     const dialogRef = this.dialog.open<CreateEditTrackModalComponent>(CreateEditTrackModalComponent);
 
     dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted}) => {
@@ -142,7 +144,9 @@ export class TracksPageComponent implements OnInit {
     });
   }
 
-  editTrack(track: TrackSearchItem): void {
+  async editTrack(track: TrackSearchItem): Promise<void> {
+    const { CreateEditTrackModalComponent } = await import('../create-edit-track-modal/create-edit-track-modal.component');
+
     const dialogRef = this.dialog.open<CreateEditTrackModalComponent>(CreateEditTrackModalComponent, {
       data: track
     });
@@ -154,11 +158,15 @@ export class TracksPageComponent implements OnInit {
     });
   }
 
-  deleteTrack(track: TrackSearchItem): void {
-    const dialogRef = this.dialog.open<DeleteTrackModalComponent>(DeleteTrackModalComponent, {
-      data: {
-        track: track,
-      }
+  /**
+   * Delete modal is lazy loaded
+   * @param track
+   */
+  async deleteTrack(track: TrackSearchItem): Promise<void> {
+    const { DeleteTrackModalComponent } = await import('../delete-track-modal/delete-track-modal.component');
+
+    const dialogRef = this.dialog.open(DeleteTrackModalComponent, {
+      data: { track: track },
     });
 
     dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({submitted}) => {
