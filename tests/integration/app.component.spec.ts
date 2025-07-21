@@ -1,10 +1,21 @@
 import { TestBed } from '@angular/core/testing';
-import { AppComponent } from './app.component';
+import { AppComponent } from '../../src/app/app.component';
+import { ActivatedRoute } from '@angular/router';
 
-describe('AppComponent', () => {
+describe('AppComponent Integration Test', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              data: {},
+            },
+          },
+        },
+      ],
     }).compileComponents();
   });
 
@@ -14,16 +25,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'Web' title`, () => {
+  it(`should have the 'Music Tracks Library' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('Web');
+    expect(app.title).toEqual('Music Tracks Library');
   });
 
-  it('should render title', () => {
+  it('should render App Logo', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, Web');
+    expect(compiled.querySelector('a[class="logo_title"]')?.textContent).toContain('MusicApp');
   });
 });

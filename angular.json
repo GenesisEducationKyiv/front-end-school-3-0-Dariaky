@@ -94,7 +94,11 @@
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "include": [
+              "src/**/*.spec.ts",
+              "../tests/**/*.spec.ts"
+            ]
           }
         },
         "lint": {
